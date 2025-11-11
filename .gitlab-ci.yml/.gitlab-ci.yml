@@ -1,0 +1,38 @@
+stages:
+  - validate
+  - build
+
+# Oddiy sintaksis validatsiya (ixtiyoriy, lekin yaxshi amaliyot)
+validate-html-css-js:
+  image: node:20-alpine
+  stage: validate
+  tags:
+    - class-10a
+  script:
+    - npx --yes htmlhint "**/*.html" || echo "HTML linting skipped"
+    - npx --yes stylelint "**/*.css" || echo "CSS linting skipped"
+    - npx --yes eslint "**/*.js" --no-error-on-unmatched-pattern || echo "JS linting skipped"
+  artifacts:
+    expire_in: 1 week
+  only:
+    - branches
+
+# Build / Deploy uchun artefakt yaratish
+build-static-site:
+  stage: build
+  image: alpine:3.20
+  tags:
+    - class-10a
+  script:
+    - mkdir -p public
+    - cp -r *.html public/
+    - cp -r css public/
+    - cp -r js public/
+    - cp -r assets public/
+    - cp -r libs public/ 2>/dev/null || true   # agar mavjud bo'lsa
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+  only:
+    - branches
